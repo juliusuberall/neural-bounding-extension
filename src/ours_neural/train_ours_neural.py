@@ -1,4 +1,5 @@
 import torch.optim as optim
+import torch
 
 from src.loss.loss import BCELossWithClassWeights
 from src.metrics.helper import print_metrics
@@ -48,9 +49,10 @@ def train_ours_neural(object_name, query, dimension, metrics_registry):
         loss.backward()
         optimiser.step()
 
-        # print loss
+        # print loss 
         if (iteration + 1) % print_frequency == 0 or iteration == 0:
-            print(f'Iteration: {iteration + 1}, Loss: {loss.item()}')
+            print(f'Iteration: {iteration + 1}, Loss: {loss.item()}, Saving model')
+            torch.save(model, 'prototyping/models/model_' + str(iteration + 1) + '.pth')
 
         if (iteration + 1) % evaluation_frequency == 0 or iteration == 0:
             prediction = (model(features).cpu().detach() >= 0.5).float().numpy()
