@@ -54,8 +54,8 @@ def main():
                         metrics_registry=metrics_registry)
 
     # run oursKDOP results
-    train_ours_kdop(object_name=args.object_name, query=args.query, dimension=args.dim,
-                    metrics_registry=metrics_registry)
+    # train_ours_kdop(object_name=args.object_name, query=args.query, dimension=args.dim,
+    #                 metrics_registry=metrics_registry)
 
     # run oursNeural results
     train_ours_neural(object_name=args.object_name, query=args.query, dimension=args.dim,

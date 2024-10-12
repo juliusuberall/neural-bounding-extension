@@ -1,0 +1,53 @@
+{
+    "configurations": [
+        {
+            "name": "Py Neural Bounding 2D",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/run_experiments.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--object_name", "bunny",
+                "--query", "point",
+                "--dim", "2"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        },
+        {
+            "type": "bashdb",
+            "request": "launch",
+            "name": "Bash-Debug",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/run.sh",
+            "args": []
+        },
+        {
+            "name": "Python-Debug",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/run_experiments.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Debug Shell and Python",
+            "configurations": [
+                "Bash-Debug",
+                "Python-Debug"
+            ]
+        },
+        {
+            "name": "Debug Python Neural Bounding",
+            "configurations": [
+                "Py Neural Bounding 2D"
+            ]
+        }
+    ]
+}
