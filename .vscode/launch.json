@@ -4,7 +4,7 @@
             "name": "Py Prototyping",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/prototyping/prot.py",
+            "program": "${workspaceFolder}/prototyping/inferenceAnalysis.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "env": {
