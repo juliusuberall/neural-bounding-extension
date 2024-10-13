@@ -1,5 +1,6 @@
 import torch.optim as optim
 import torch
+import matplotlib.pyplot as plt
 
 from src.loss.loss import BCELossWithClassWeights
 from src.metrics.helper import print_metrics
@@ -34,6 +35,9 @@ def train_ours_neural(object_name, query, dimension, metrics_registry):
     # instantiate count for early stopping
     count = 0
 
+    # initialise plot data lists for loss on each exit
+    plt_iteration, plt_loss1, plt_loss2, plt_loss3, plt_lossMean = [],[],[],[],[]
+
     for iteration in range(total_iterations):
         features, targets = get_training_data(data=data, query=query, dimension=dimension, n_regions=n_regions,
                                               n_samples=n_samples)
@@ -41,8 +45,14 @@ def train_ours_neural(object_name, query, dimension, metrics_registry):
         # forward pass
         output = model(features)
 
-        # compute loss
-        loss = criterion(output, targets)
+        # compute average loss for all exits
+        loss1 = criterion(output[0], targets)
+        loss2 = criterion(output[1], targets)
+        loss3 = criterion(output[2], targets)
+        l1_weight = 1.0
+        l2_weight = 1.0
+        l3_weight = 1.0
+        loss = (loss1*l1_weight + loss2*l2_weight + loss3*l3_weight) / (l1_weight+l2_weight+l3_weight)
 
         # zero gradients, backward pass, optimiser step
         optimiser.zero_grad()
@@ -51,17 +61,38 @@ def train_ours_neural(object_name, query, dimension, metrics_registry):
 
         # print loss 
         if (iteration + 1) % print_frequency == 0 or iteration == 0:
-            print(f'Iteration: {iteration + 1}, Loss: {loss.item()}, Saving model')
-            torch.save(model, 'prototyping/models/model_' + str(iteration + 1) + '.pth')
+            print(f'Iteration: {iteration + 1}, Loss: {loss.item()},')
+            # torch.save(model, 'prototyping/models/model_' + str(iteration + 1) + '.pth')
+            # print("Model saved")
+
+            # create loss plot
+            plt_iteration.append(iteration + 1)
+            plt_loss1.append(loss1.detach().numpy())
+            plt_loss2.append(loss2.detach().numpy())
+            plt_loss3.append(loss3.detach().numpy())
+            plt_lossMean.append(loss.detach().numpy())
+            plt.figure(figsize=(8, 6))
+            plt.plot(plt_iteration, plt_loss1, label=f'L1 - {l1_weight}', color='blue')
+            plt.plot(plt_iteration, plt_loss2, label=f'L2 - {l2_weight}', color='orange')
+            plt.plot(plt_iteration, plt_loss3, label=f'L3 - {l3_weight}', color='pink')
+            plt.plot(plt_iteration, plt_lossMean, label='Mean', color='black', linestyle='--')
+            plt.xlabel('Iteration')
+            plt.ylabel('Loss')
+            plt.title('Layer Loss History')
+            plt.legend()
+            plt.savefig("prototyping/inferenceAnalysisResults/LayerLossHistory.png", dpi=300, bbox_inches='tight')
+            plt.close()
+            print(f"Saved new layer loss history plot")
+
 
         if (iteration + 1) % evaluation_frequency == 0 or iteration == 0:
-            prediction = (model(features).cpu().detach() >= 0.5).float().numpy()
+            prediction = (loss.cpu().detach() >= 0.5).float().numpy()
             target = targets.cpu().detach().numpy()
             metrics = MetricsCalculator.calculate(prediction=prediction, target=target)
             print_metrics(metrics)
 
         if (iteration + 1) % evaluation_frequency == 0:
-            prediction = (model(features).cpu().detach() >= 0.5).float().numpy()
+            prediction = (loss.cpu().detach() >= 0.5).float().numpy()
             target = targets.cpu().detach().numpy()
             metrics = MetricsCalculator.calculate(prediction=prediction, target=target)
 
