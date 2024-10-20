@@ -1,4 +1,5 @@
 import torch.optim as optim
+import torch
 
 from src.loss.loss import BCELossWithClassWeights
 from src.metrics.helper import print_metrics
